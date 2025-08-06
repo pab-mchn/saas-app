@@ -23,8 +23,8 @@ const CompanionCard = ({id,name,topic,subject,duration,color}: CompanionCardProp
       <p className="text-sm">{topic}</p>
       <div className="flex items-center gap-2">
           <Image src='./icons/clock.svg' alt="duration" width={13.5} height={13.5}/>
+          <p className="text-sm">{duration} minutes</p>
       </div>
-      <p className="text-sm">{duration} minutes</p>
       <Link href={ `companions/${id}`} className="w-full">
       <button className="btn-primary w-full justify-center">
         Launch Lesson
