@@ -1,6 +1,6 @@
 "use client"
 
-import { minLength, z } from "zod"
+import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
@@ -24,6 +24,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { subjects } from "@/constants"
 import { Textarea } from "./ui/textarea"
+import { createCompanion } from "@/lib/actions/companion.actions"
+import { redirect } from "next/navigation"
 
  
 
@@ -53,9 +55,14 @@ const CompanionForm = () => {
   })
  
   // 2. Define a submit handler.
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-
-    console.log(values)
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const companion = await createCompanion(values)
+    if(companion){
+      redirect(`/companions/${companion.id}`)
+    }else{
+      console.log("Failed to create a companion")
+      redirect('/')
+    }
   }
   return (
     <Form {...form}>
@@ -184,23 +191,26 @@ const CompanionForm = () => {
         )}
       />
 
-            <FormField
-        control={form.control}
-        name="duration"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Estimated duration</FormLabel>
-            <FormControl>
-              <Input 
-                type="number"
-                placeholder="15" 
-                {...field} 
-                className="input" />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+<FormField
+  control={form.control}
+  name="duration"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Estimated duration</FormLabel>
+      <FormControl>
+        <Input 
+          type="number"
+          placeholder="15"
+          value={field.value}
+          onChange={(e) => field.onChange(Number(e.target.value))}
+          className="input"
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+  
       <Button type="submit" className="w-full cursor-pointer">Create your Course</Button>
     </form>
   </Form>
