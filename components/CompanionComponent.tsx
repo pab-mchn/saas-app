@@ -1,5 +1,5 @@
 'use client'
-import { cn, getSubjectColor } from '@/lib/utils'
+import { cn, configureAssistant, getSubjectColor } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 
 import soundwaves from '@/constants/soundwaves.json'
@@ -7,7 +7,7 @@ import Image from 'next/image'
 
 import { vapi } from '@/lib/vapi.sdk'
 import Lottie, { LottieComponentProps, LottieRefCurrentProps } from 'lottie-react'
-import { is } from 'zod/v4/locales'
+
 
 enum CallStatus {
   INACTIVE = 'INACTIVE',
@@ -16,7 +16,7 @@ enum CallStatus {
   FINISHED = 'FINISHED'
 }
 
-const CompanionComponent = ({companionId, subject, name, userName, userImage,style, voice}: CompanionComponentProps) => {
+const CompanionComponent = ({companionId, subject, name, userName, userImage,style,topic, voice}: CompanionComponentProps) => {
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE)
   const [isSpeacking, setIsSpeacking] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
@@ -71,11 +71,24 @@ const CompanionComponent = ({companionId, subject, name, userName, userImage,sty
   }
 
   const handleCall = async () => {
+      setCallStatus(CallStatus.CONNECTING)
 
+      const assistantOverrides = {
+        variableValues: {
+          subject,
+          topic,
+          style,
+        },
+        clientMessages: ["transcript"],
+        serverMessages: [], 
+      }
+      // @ts-expect-error
+      vapi.start(configureAssistant(voice, style), assistantOverrides)
   }
 
   const handleDisconnect = async () => {
-    
+    setCallStatus(CallStatus.FINISHED)
+    vapi.stop()
   }
   return (
     <section className='flex flex-col h-[70vh]'>
@@ -125,6 +138,12 @@ const CompanionComponent = ({companionId, subject, name, userName, userImage,sty
                 callStatus === CallStatus.CONNECTING ? 'Connecting' : 'Start-session'}
               </button>
             </div>
+        </section>
+        <section className='transcript'>
+          <div className='transcript-message no-scrollbar'>
+                  Messages
+          </div>
+          <div className='transcript-fade'/>
         </section>
     </section>
   )
